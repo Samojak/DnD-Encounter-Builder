@@ -1,11 +1,12 @@
 using API.Data;
 using API.Clients;
 using API.Services;
+using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers();
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -14,6 +15,12 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddHttpClient<DndApiClient>();
 builder.Services.AddScoped<MonsterImportService>();
 builder.Services.AddScoped<EncounterCalculationService>();
+
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });
 
 var app = builder.Build();
 

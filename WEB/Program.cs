@@ -1,27 +1,33 @@
 using WEB.Components;
+using WEB.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Add services
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+// HttpClient for API
+builder.Services.AddScoped(sp => new HttpClient
+{
+    BaseAddress = new Uri("http://localhost:5199/") // <-- API URL
+});
+
+// Your API wrapper
+builder.Services.AddScoped<ApiClient>();
+
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Configure pipeline
 if (!app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Error", createScopeForErrors: true);
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
+    app.UseExceptionHandler("/Error");
 }
 
-app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
-app.UseHttpsRedirection();
-
+app.UseStaticFiles();
 app.UseAntiforgery();
 
-app.MapStaticAssets();
+// Map Blazor
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 

@@ -1,0 +1,46 @@
+﻿.page-layout {
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+}
+
+.left-panel {
+    flex: 3;
+    border: 1px solid #ccc;
+    padding: 16px;
+    border-radius: 8px;
+}
+
+.right-panel {
+    flex: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.monster-list {
+    max-height: 70vh;
+    overflow-y: auto;
+    margin-top: 12px;
+}
+
+.party-card,
+.encounter-card,
+.result-card {
+    border: 1px solid #ccc;
+    padding: 16px;
+    border-radius: 8px;
+}
+.monster-toolbar {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+}
+
+.monster-toolbar input,
+.monster-toolbar select {
+    padding: 8px 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}

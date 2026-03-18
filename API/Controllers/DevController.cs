@@ -15,7 +15,7 @@ public class DevController : ControllerBase
     }
 
     [HttpPost("import-monsters")]
-    public async Task<IActionResult> ImportMonsters([FromQuery] int limit = 50)
+    public async Task<IActionResult> ImportMonsters([FromQuery] int? limit = null)
     {
         var imported = await _monsterImportService.ImportMonstersAsync(limit);
         return Ok(new { imported });

@@ -16,15 +16,24 @@ public class MonsterImportService
         _dbContext = dbContext;
     }
 
-    public async Task<int> ImportMonstersAsync(int limit = 50)
+    public async Task<int> ImportMonstersAsync(int? limit = null)
     {
         var indexes = await _dndApiClient.GetMonsterIndexesAsync();
+
+        if (limit.HasValue)
+        {
+            indexes = indexes.Take(limit.Value).ToList();
+        }
+
+        var existingIndexes = await _dbContext.Monsters
+            .Select(m => m.ApiIndex)
+            .ToHashSetAsync();
+
         var importedCount = 0;
 
-        foreach (var index in indexes.Take(limit))
+        foreach (var index in indexes)
         {
-            var exists = await _dbContext.Monsters.AnyAsync(m => m.ApiIndex == index);
-            if (exists)
+            if (existingIndexes.Contains(index))
                 continue;
 
             var rawJson = await _dndApiClient.GetMonsterRawJsonAsync(index);
