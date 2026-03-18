@@ -6,9 +6,6 @@
 
 .left-panel {
     flex: 3;
-    border: 1px solid #ccc;
-    padding: 16px;
-    border-radius: 8px;
 }
 
 .right-panel {
@@ -18,29 +15,54 @@
     gap: 16px;
 }
 
-.monster-list {
-    max-height: 70vh;
-    overflow-y: auto;
-    margin-top: 12px;
+.panel-card {
+    border: 1px solid #d0d0d0;
+    border-radius: 10px;
+    padding: 16px;
+    background: white;
 }
 
-.party-card,
-.encounter-card,
-.result-card {
-    border: 1px solid #ccc;
-    padding: 16px;
-    border-radius: 8px;
-}
 .monster-toolbar {
     display: flex;
     gap: 12px;
-    margin-bottom: 12px;
     flex-wrap: wrap;
+    margin-bottom: 12px;
 }
 
 .monster-toolbar input,
-.monster-toolbar select {
+.monster-toolbar select,
+.form-row input {
     padding: 8px 10px;
-    border: 1px solid #ccc;
+    border: 1px solid #cfcfcf;
     border-radius: 6px;
+}
+
+.monster-list {
+    max-height: 70vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.monster-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    padding: 12px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+}
+
+.form-row {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 12px;
+}
+
+.muted-text {
+    color: #666;
+    font-size: 0.95rem;
 }

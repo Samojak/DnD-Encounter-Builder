@@ -6,12 +6,11 @@
 
 <h3>Encounter Builder</h3>
 
-
-
 <div class="page-layout">
     <div class="left-panel">
-        <h3>Monsters</h3>
-        <div class="monster-list">
+        <div class="panel-card">
+            <h2>Monsters</h2>
+
             <div class="monster-toolbar">
                 <input @bind="searchTerm" placeholder="Search monsters..." />
 
@@ -61,44 +60,50 @@
                 </select>
             </div>
 
-            <p>Showing @filteredMonsters.Count() of @monsters.Count monsters</p>
+            <p class="muted-text">Showing @filteredMonsters.Count() of @monsters.Count monsters</p>
 
-            <h4>Available Monsters</h4>
-            <ul>
-                @if (isLoading)
-                {
-                    <p>Loading monsters...</p>
-                }
-                @foreach (var monster in filteredMonsters)
-                {
-                    <li>
-                        @monster.Name (CR @FormatCr(monster.ChallengeRating), XP @monster.Xp)
-                        <button @onclick="() => AddMonster(monster)">Add</button>
-                    </li>
-                }
-            </ul>
+            @if (isLoading)
+            {
+                <p>Loading monsters...</p>
+            }
+            else
+            {
+                <div class="monster-list">
+                    @foreach (var monster in filteredMonsters)
+                    {
+                        <div class="monster-row">
+                            <div>
+                                <strong>@monster.Name</strong>
+                                <div class="muted-text">
+                                    CR @FormatCr(monster.ChallengeRating), XP @monster.Xp, @monster.Type
+                                </div>
+                            </div>
+
+                            <button type="button" @onclick="() => AddMonster(monster)">Add</button>
+                        </div>
+                    }
+                </div>
+            }
         </div>
     </div>
 
     <div class="right-panel">
-        <div class="party-card">
-            <h4>Party</h4>
+        <div class="panel-card">
+            <h2>Party</h2>
 
-            <div>
-                <label>Party Size: </label>
+            <div class="form-row">
+                <label>Party Size</label>
                 <input type="number" min="1" @bind="partySize" />
             </div>
 
-            <div>
-                <label>Party Level: </label>
+            <div class="form-row">
+                <label>Party Level</label>
                 <input type="number" min="1" max="20" @bind="partyLevel" />
             </div>
-
-          
         </div>
 
-        <div class="encounter-card">
-            <h4>Selected Encounter</h4>
+        <div class="panel-card">
+            <h2>Encounter</h2>
 
             @if (selectedMonsters.Count == 0)
             {
@@ -113,20 +118,19 @@
                             @selected.Name
                             Quantity: @selected.Quantity
 
-                            <button @onclick="() => IncreaseQuantity(selected.MonsterId)">+</button>
-                            <button @onclick="() => DecreaseQuantity(selected.MonsterId)">-</button>
-                            <button @onclick="() => RemoveMonster(selected.MonsterId)">Remove</button>
+                            <button type="button" @onclick="() => IncreaseQuantity(selected.MonsterId)">+</button>
+                            <button type="button" @onclick="() => DecreaseQuantity(selected.MonsterId)">-</button>
+                            <button type="button" @onclick="() => RemoveMonster(selected.MonsterId)">Remove</button>
                         </li>
                     }
                 </ul>
             }
-
         </div>
 
-        <div class="result-card">
+        <div class="panel-card">
+            <h2>Result</h2>
+
             <button type="button" @onclick="CalculateEncounter">Calculate</button>
-            
-            <h4>Encounter Result</h4>
 
             @if (calculationResult is null)
             {
@@ -143,15 +147,14 @@
                     <li>Monster Multiplier: @calculationResult.MonsterMultiplier</li>
                     <li>Adjusted Monster XP: @calculationResult.AdjustedMonsterXp</li>
                     <li>Monster Count: @calculationResult.MonsterCount</li>
-                    <li>Difficulty: <strong>@calculationResult.Difficulty</strong></li>
+                    <li><strong>Difficulty: @calculationResult.Difficulty</strong></li>
                 </ul>
             }
 
-            
+            <p class="muted-text">Status: @statusMessage</p>
         </div>
     </div>
 </div>
-<p>Status: @statusMessage</p>
 
 @code {
     private List<MonsterListItemDto> monsters = new();
