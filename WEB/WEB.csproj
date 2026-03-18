@@ -11,4 +11,15 @@
       <ProjectReference Include="..\Shared\Shared.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Include="wwwroot\app.css" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Update="Components\Pages\Index.razor.css">
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </Content>
+    </ItemGroup>
+
 </Project>

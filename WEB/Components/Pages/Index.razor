@@ -4,16 +4,18 @@
 @rendermode InteractiveServer
 @inject ApiClient Api
 
-<h3>Encounter Builder</h3>
+<div class="encounter-page">
+    <h3>Encounter Builder</h3>
+    <p class="encounter-subtitle">Build balanced battles and keep the danger under control.</p>
+   
 
-<div class="page-layout">
+    <div class="page-layout">
     <div class="left-panel">
         <div class="panel-card">
             <h2>Monsters</h2>
 
             <div class="monster-toolbar">
-                <input @bind="searchTerm" placeholder="Search monsters..." />
-
+                <input @bind="searchTerm" @bind:event="oninput" placeholder="Search monsters..." />
                 <select @bind="selectedSort">
                     <option value="name-asc">Name A-Z</option>
                     <option value="name-desc">Name Z-A</option>
@@ -58,10 +60,10 @@
                     <option value="29">29</option>
                     <option value="30">30</option>
                 </select>
+                <button type="button" @onclick="ResetFilters">Reset</button>
             </div>
 
-            <p class="muted-text">Showing @filteredMonsters.Count() of @monsters.Count monsters</p>
-
+            <p class="muted-text">Showing @FilteredMonsters.Count of @monsters.Count monsters</p>
             @if (isLoading)
             {
                 <p>Loading monsters...</p>
@@ -69,7 +71,7 @@
             else
             {
                 <div class="monster-list">
-                    @foreach (var monster in filteredMonsters)
+                    @foreach (var monster in FilteredMonsters)
                     {
                         <div class="monster-row">
                             <div>
@@ -79,7 +81,21 @@
                                 </div>
                             </div>
 
-                            <button type="button" @onclick="() => AddMonster(monster)">Add</button>
+                            @{
+                                var selected = selectedMonsters.FirstOrDefault(m => m.MonsterId == monster.Id);
+                            }
+
+                            <div class="monster-actions">
+                                @if (selected is null)
+                                {
+                                    <button type="button" @onclick="() => AddMonster(monster)">Add</button>
+                                }
+                                else
+                                {
+                                    <span class="muted-text">Added x @(selected.Quantity)</span>
+                                    <button type="button" @onclick="() => AddMonster(monster)">+1</button>
+                                }
+                            </div>
                         </div>
                     }
                 </div>
@@ -93,68 +109,153 @@
 
             <div class="form-row">
                 <label>Party Size</label>
-                <input type="number" min="1" @bind="partySize" />
+                <input type="number" min="1" value="@partySize" @oninput="OnPartySizeChanged" />
             </div>
 
             <div class="form-row">
                 <label>Party Level</label>
-                <input type="number" min="1" max="20" @bind="partyLevel" />
+                <input type="number" min="1" max="20" value="@partyLevel" @oninput="OnPartyLevelChanged" />   
             </div>
         </div>
 
-        <div class="panel-card">
+        <div class="panel-card encounter-card">
             <h2>Encounter</h2>
+
+            <div class="section-button-row">
+                <button type="button" @onclick="ClearEncounter">Clear Encounter</button>
+            </div>
 
             @if (selectedMonsters.Count == 0)
             {
-                <p>No monsters added yet.</p>
+                <p class="muted-text" style="margin-top:10px;">No monsters added yet.</p>
             }
             else
             {
-                <ul>
+                <div class="encounter-list">
                     @foreach (var selected in selectedMonsters)
                     {
-                        <li>
-                            @selected.Name
-                            Quantity: @selected.Quantity
+                        <div class="encounter-item">
+                            <div>
+                                <strong>@selected.Name</strong>
+                                <div class="muted-text">
+                                    CR @FormatCr(selected.ChallengeRating), XP @selected.Xp each
+                                </div>
+                                <div class="muted-text">
+                                    Subtotal XP: @(selected.Xp * selected.Quantity)
+                                </div>
+                            </div>
 
-                            <button type="button" @onclick="() => IncreaseQuantity(selected.MonsterId)">+</button>
-                            <button type="button" @onclick="() => DecreaseQuantity(selected.MonsterId)">-</button>
-                            <button type="button" @onclick="() => RemoveMonster(selected.MonsterId)">Remove</button>
-                        </li>
+                            <div class="encounter-controls">
+                                <button type="button" @onclick="() => DecreaseQuantity(selected.MonsterId)">-</button>
+                                <span class="qty-pill">@selected.Quantity</span>
+                                <button type="button" @onclick="() => IncreaseQuantity(selected.MonsterId)">+</button>
+                                <button type="button" @onclick="() => RemoveMonster(selected.MonsterId)">Remove</button>
+                            </div>
+                        </div>
                     }
-                </ul>
+                </div>
             }
         </div>
-
+        
         <div class="panel-card">
-            <h2>Result</h2>
+            <h2>Summary</h2>
 
-            <button type="button" @onclick="CalculateEncounter">Calculate</button>
+            <div class="summary-grid">
+                <div class="summary-stat">
+                    <span class="summary-stat-label">Total monsters</span>
+                    <span class="summary-stat-value">@TotalMonsterCount</span>
+                </div>
 
-            @if (calculationResult is null)
+                <div class="summary-stat">
+                    <span class="summary-stat-label">Unique monsters</span>
+                    <span class="summary-stat-value">@selectedMonsters.Count</span>
+                </div>
+
+                <div class="summary-stat">
+                    <span class="summary-stat-label">Total raw XP</span>
+                    <span class="summary-stat-value">@TotalRawXp</span>
+                </div>
+
+                <div class="summary-stat">
+                    <span class="summary-stat-label">Highest CR</span>
+                    <span class="summary-stat-value">@FormatCr(HighestCr)</span>
+                </div>
+            </div>
+        </div>
+
+       <div class="panel-card result-card">
+    <div class="result-top">
+        <h2 style="margin:0;">Result</h2>
+
+        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+            @if (calculationResult is not null)
             {
-                <p>No calculation yet.</p>
-            }
-            else
-            {
-                <ul>
-                    <li>Easy Threshold: @calculationResult.PartyEasyThreshold</li>
-                    <li>Medium Threshold: @calculationResult.PartyMediumThreshold</li>
-                    <li>Hard Threshold: @calculationResult.PartyHardThreshold</li>
-                    <li>Deadly Threshold: @calculationResult.PartyDeadlyThreshold</li>
-                    <li>Raw Monster XP: @calculationResult.RawMonsterXp</li>
-                    <li>Monster Multiplier: @calculationResult.MonsterMultiplier</li>
-                    <li>Adjusted Monster XP: @calculationResult.AdjustedMonsterXp</li>
-                    <li>Monster Count: @calculationResult.MonsterCount</li>
-                    <li><strong>Difficulty: @calculationResult.Difficulty</strong></li>
-                </ul>
+                <span class="difficulty-badge @(GetDifficultyClass(calculationResult.Difficulty))">
+                    @calculationResult.Difficulty
+                </span>
             }
 
-            <p class="muted-text">Status: @statusMessage</p>
+            <button type="button" @onclick="CalculateEncounter" disabled="@(!CanCalculate)">Calculate</button>
         </div>
     </div>
+
+    @if (calculationResult is null)
+    {
+        <p class="muted-text">No calculation yet.</p>
+    }
+    else
+    {
+        <div class="result-grid">
+            <div class="result-stat">
+                <span class="result-stat-label">Easy Threshold</span>
+                <span class="result-stat-value">@calculationResult.PartyEasyThreshold</span>
+            </div>
+
+            <div class="result-stat">
+                <span class="result-stat-label">Medium Threshold</span>
+                <span class="result-stat-value">@calculationResult.PartyMediumThreshold</span>
+            </div>
+
+            <div class="result-stat">
+                <span class="result-stat-label">Hard Threshold</span>
+                <span class="result-stat-value">@calculationResult.PartyHardThreshold</span>
+            </div>
+
+            <div class="result-stat">
+                <span class="result-stat-label">Deadly Threshold</span>
+                <span class="result-stat-value">@calculationResult.PartyDeadlyThreshold</span>
+            </div>
+
+            <div class="result-stat">
+                <span class="result-stat-label">Raw Monster XP</span>
+                <span class="result-stat-value">@calculationResult.RawMonsterXp</span>
+            </div>
+
+            <div class="result-stat">
+                <span class="result-stat-label">Multiplier</span>
+                <span class="result-stat-value">@calculationResult.MonsterMultiplier</span>
+            </div>
+
+            <div class="result-stat">
+                <span class="result-stat-label">Adjusted XP</span>
+                <span class="result-stat-value">@calculationResult.AdjustedMonsterXp</span>
+            </div>
+
+            <div class="result-stat">
+                <span class="result-stat-label">Monster Count</span>
+                <span class="result-stat-value">@calculationResult.MonsterCount</span>
+            </div>
+        </div>
+    }
+
+    <div class="status-line">
+        Status: @statusMessage
+    </div>
 </div>
+    </div>
+</div>
+</div>
+
 
 @code {
     private List<MonsterListItemDto> monsters = new();
@@ -167,6 +268,27 @@
     private string selectedSort = "name-asc";
     private string selectedCrFilter = "";
     private bool isLoading = false;
+    private int TotalMonsterCount => selectedMonsters.Sum(m => m.Quantity);
+    private int TotalRawXp => selectedMonsters.Sum(m => m.Xp * m.Quantity);
+    private decimal HighestCr => selectedMonsters.Any()
+        ? selectedMonsters.Max(m => m.ChallengeRating)
+        : 0;
+    private bool CanCalculate =>
+        selectedMonsters.Any() &&
+        partySize > 0 &&
+        partyLevel is >= 1 and <= 20;
+    private bool isCalculating = false;
+    private string? errorMessage;
+    private List<MonsterListItemDto> FilteredMonsters => GetFilteredMonsters().ToList();
+    private static string GetDifficultyClass(DifficultyRating difficulty) => difficulty switch
+    {
+        DifficultyRating.Easy => "difficulty-easy",
+        DifficultyRating.Medium => "difficulty-medium",
+        DifficultyRating.Hard => "difficulty-hard",
+        DifficultyRating.Deadly => "difficulty-deadly",
+        _ => "difficulty-default"
+    };
+    
 
     
     protected override async Task OnInitializedAsync()
@@ -196,36 +318,40 @@
         }
     }
 
-    private void AddMonster(MonsterListItemDto monster)
+    private async Task AddMonster(MonsterListItemDto monster)
     {
         var existing = selectedMonsters.FirstOrDefault(m => m.MonsterId == monster.Id);
 
         if (existing is not null)
         {
             existing.Quantity++;
-            return;
+        }
+        else
+        {
+            selectedMonsters.Add(new SelectedMonsterViewModel
+            {
+                MonsterId = monster.Id,
+                Name = monster.Name,
+                Xp = monster.Xp,
+                ChallengeRating = monster.ChallengeRating,
+                Quantity = 1
+            });
         }
 
-        selectedMonsters.Add(new SelectedMonsterViewModel
-        {
-            MonsterId = monster.Id,
-            Name = monster.Name,
-            Xp = monster.Xp,
-            ChallengeRating = monster.ChallengeRating,
-            Quantity = 1
-        });
+        await RecalculateIfPossible();
     }
 
-    private void IncreaseQuantity(int monsterId)
+    private async Task IncreaseQuantity(int monsterId)
     {
         var monster = selectedMonsters.FirstOrDefault(m => m.MonsterId == monsterId);
         if (monster is not null)
         {
             monster.Quantity++;
+            await RecalculateIfPossible();
         }
     }
 
-    private void DecreaseQuantity(int monsterId)
+    private async Task DecreaseQuantity(int monsterId)
     {
         var monster = selectedMonsters.FirstOrDefault(m => m.MonsterId == monsterId);
         if (monster is null)
@@ -237,14 +363,17 @@
         {
             selectedMonsters.Remove(monster);
         }
+
+        await RecalculateIfPossible();
     }
 
-    private void RemoveMonster(int monsterId)
+    private async Task RemoveMonster(int monsterId)
     {
         var monster = selectedMonsters.FirstOrDefault(m => m.MonsterId == monsterId);
         if (monster is not null)
         {
             selectedMonsters.Remove(monster);
+            await RecalculateIfPossible();
         }
     }
 
@@ -259,11 +388,12 @@
     
     private async Task CalculateEncounter()
     {
-        statusMessage = "Calculate clicked";
-        StateHasChanged();
-
         try
         {
+            isCalculating = true;
+            errorMessage = null;
+            statusMessage = "Calculating encounter...";
+
             var request = new EncounterCalculationRequestDto
             {
                 PartyMembers = Enumerable.Range(0, partySize)
@@ -282,9 +412,6 @@
                     .ToList()
             };
 
-            statusMessage = $"Sending request with {request.PartyMembers.Count} party members and {request.Monsters.Count} monster entries";
-            StateHasChanged();
-
             calculationResult = await Api.CalculateAsync(request);
 
             if (calculationResult is null)
@@ -297,37 +424,12 @@
         }
         catch (Exception ex)
         {
-            statusMessage = $"Error: {ex.Message}";
+            errorMessage = ex.Message;
+            statusMessage = "Calculation failed.";
         }
-    }
-    
-    private IEnumerable<MonsterListItemDto> filteredMonsters
-    {
-        get
+        finally
         {
-            IEnumerable<MonsterListItemDto> query = monsters;
-
-            if (!string.IsNullOrWhiteSpace(searchTerm))
-            {
-                query = query.Where(m =>
-                    m.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
-            }
-
-            if (!string.IsNullOrWhiteSpace(selectedCrFilter) &&
-                decimal.TryParse(selectedCrFilter, out var cr))
-            {
-                query = query.Where(m => m.ChallengeRating == cr);
-            }
-
-            query = selectedSort switch
-            {
-                "name-desc" => query.OrderByDescending(m => m.Name),
-                "cr-asc" => query.OrderBy(m => m.ChallengeRating).ThenBy(m => m.Name),
-                "cr-desc" => query.OrderByDescending(m => m.ChallengeRating).ThenBy(m => m.Name),
-                _ => query.OrderBy(m => m.Name)
-            };
-
-            return query;
+            isCalculating = false;
         }
     }
     
@@ -338,4 +440,80 @@
         0.5m => "1/2",
         _ => cr.ToString()
     };
+    
+    private void ResetFilters()
+    {
+        searchTerm = "";
+        selectedSort = "name-asc";
+        selectedCrFilter = "";
+    }
+    
+    private void ClearEncounter()
+    {
+        selectedMonsters.Clear();
+        calculationResult = null;
+        statusMessage = "Encounter cleared.";
+    }
+    
+    private async Task RecalculateIfPossible()
+    {
+        if (CanCalculate)
+        {
+            await CalculateEncounter();
+        }
+        else
+        {
+            calculationResult = null;
+        }
+    }
+    
+    private async Task OnPartySizeChanged(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var value))
+        {
+            partySize = value;
+            await RecalculateIfPossible();
+        }
+    }
+
+    private async Task OnPartyLevelChanged(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var value))
+        {
+            partyLevel = value;
+            await RecalculateIfPossible();
+        }
+    }
+    
+    private IEnumerable<MonsterListItemDto> GetFilteredMonsters()
+    {
+        IEnumerable<MonsterListItemDto> query = monsters;
+
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            query = query.Where(m =>
+                m.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrWhiteSpace(selectedCrFilter) &&
+            decimal.TryParse(selectedCrFilter, out var cr))
+        {
+            query = query.Where(m => m.ChallengeRating == cr);
+        }
+
+        query = selectedSort switch
+        {
+            "name-desc" => query.OrderByDescending(m => m.Name),
+            "cr-asc" => query.OrderBy(m => m.ChallengeRating).ThenBy(m => m.Name),
+            "cr-desc" => query.OrderByDescending(m => m.ChallengeRating).ThenBy(m => m.Name),
+            _ => query.OrderBy(m => m.Name)
+        };
+
+        return query;
+    }
+    
+    
+    
+    
 }
+
