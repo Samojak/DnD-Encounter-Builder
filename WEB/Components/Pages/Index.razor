@@ -6,128 +6,174 @@
 
 <div class="encounter-page">
     <h3>Encounter Builder</h3>
+   
     <p class="encounter-subtitle">Build balanced battles and keep the danger under control.</p>
    
 
     <div class="page-layout">
-    <div class="left-panel">
-        <div class="panel-card">
-            <h2>Monsters</h2>
+        <div class="left-panel">
+            <div class="panel-card">
+                <h2>Monsters</h2>
 
-            <div class="monster-toolbar">
-                <input @bind="searchTerm" @bind:event="oninput" placeholder="Search monsters..." />
-                <select @bind="selectedSort">
-                    <option value="name-asc">Name A-Z</option>
-                    <option value="name-desc">Name Z-A</option>
-                    <option value="cr-asc">CR Low to High</option>
-                    <option value="cr-desc">CR High to Low</option>
-                </select>
+                <div class="monster-top-controls">
+                    <div class="setup-field">
+                        <label>Party Size</label>
+                        <input type="number" min="1" value="@partySize" @oninput="OnPartySizeChanged" />
+                    </div>
 
-                <select @bind="selectedCrFilter">
-                    <option value="">All CR</option>
-                    <option value="0">0</option>
-                    <option value="0.125">1/8</option>
-                    <option value="0.25">1/4</option>
-                    <option value="0.5">1/2</option>
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                    <option value="4">4</option>
-                    <option value="5">5</option>
-                    <option value="6">6</option>
-                    <option value="7">7</option>
-                    <option value="8">8</option>
-                    <option value="9">9</option>
-                    <option value="10">10</option>
-                    <option value="11">11</option>
-                    <option value="12">12</option>
-                    <option value="13">13</option>
-                    <option value="14">14</option>
-                    <option value="15">15</option>
-                    <option value="16">16</option>
-                    <option value="17">17</option>
-                    <option value="18">18</option>
-                    <option value="19">19</option>
-                    <option value="20">20</option>
-                    <option value="21">21</option>
-                    <option value="22">22</option>
-                    <option value="23">23</option>
-                    <option value="24">24</option>
-                    <option value="25">25</option>
-                    <option value="26">26</option>
-                    <option value="27">27</option>
-                    <option value="28">28</option>
-                    <option value="29">29</option>
-                    <option value="30">30</option>
-                </select>
-                <button type="button" @onclick="ResetFilters">Reset</button>
-            </div>
+                    <div class="setup-field">
+                        <label>Party Level</label>
+                        <input type="number" min="1" max="20" value="@partyLevel" @oninput="OnPartyLevelChanged" />
+                    </div>
+                </div>
 
-            <p class="muted-text">Showing @FilteredMonsters.Count of @monsters.Count monsters</p>
-            @if (isLoading)
-            {
-                <p>Loading monsters...</p>
-            }
-            else
-            {
-                <div class="monster-list">
-                    @foreach (var monster in FilteredMonsters)
-                    {
-                        <div class="monster-row">
-                            <div>
-                                <strong>@monster.Name</strong>
-                                <div class="muted-text">
-                                    CR @FormatCr(monster.ChallengeRating), XP @monster.Xp, @monster.Type
+                <div class="monster-toolbar">
+                    <input @bind="searchTerm" @bind:event="oninput" placeholder="Search monsters..." />
+
+                    <select @bind="selectedSort">
+                        <option value="name-asc">Name A-Z</option>
+                        <option value="name-desc">Name Z-A</option>
+                        <option value="cr-asc">CR Low to High</option>
+                        <option value="cr-desc">CR High to Low</option>
+                    </select>
+
+                    <select @bind="selectedCrFilter">
+                        <option value="">All CR</option>
+                        <option value="0">0</option>
+                        <option value="0.125">1/8</option>
+                        <option value="0.25">1/4</option>
+                        <option value="0.5">1/2</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                        <option value="7">7</option>
+                        <option value="8">8</option>
+                        <option value="9">9</option>
+                        <option value="10">10</option>
+                        <option value="11">11</option>
+                        <option value="12">12</option>
+                        <option value="13">13</option>
+                        <option value="14">14</option>
+                        <option value="15">15</option>
+                        <option value="16">16</option>
+                        <option value="17">17</option>
+                        <option value="18">18</option>
+                        <option value="19">19</option>
+                        <option value="20">20</option>
+                        <option value="21">21</option>
+                        <option value="22">22</option>
+                        <option value="23">23</option>
+                        <option value="24">24</option>
+                        <option value="25">25</option>
+                        <option value="26">26</option>
+                        <option value="27">27</option>
+                        <option value="28">28</option>
+                        <option value="29">29</option>
+                        <option value="30">30</option>
+                    </select>
+
+                    <button type="button" @onclick="ResetFilters">Reset</button>
+                </div>
+
+                <p class="monster-count-line">Showing @FilteredMonsters.Count of @monsters.Count monsters</p>
+                @if (isLoading)
+                {
+                    <p>Loading monsters...</p>
+                }
+                else
+                {
+                    <div class="monster-list">
+                        @foreach (var monster in FilteredMonsters)
+                        {
+                            <div class="monster-row">
+                                <div>
+                                    <strong class="monster-name-link" @onclick="() => OpenMonsterDetails(monster.Id)">
+                                        @monster.Name
+                                    </strong>
+                                    <div class="muted-text">
+                                        CR @FormatCr(monster.ChallengeRating), XP @monster.Xp, @monster.Type
+                                    </div>
+                                </div>
+
+                                @{
+                                    var selected = selectedMonsters.FirstOrDefault(m => m.MonsterId == monster.Id);
+                                }
+
+                                <div class="monster-actions">
+                                    @if (selected is null)
+                                    {
+                                        <button type="button" @onclick="() => AddMonster(monster)">Add</button>
+                                    }
+                                    else
+                                    {
+                                        <span class="muted-text">Added x @(selected.Quantity)</span>
+                                        <button type="button" @onclick="() => AddMonster(monster)">+1</button>
+                                    }
                                 </div>
                             </div>
-
-                            @{
-                                var selected = selectedMonsters.FirstOrDefault(m => m.MonsterId == monster.Id);
-                            }
-
-                            <div class="monster-actions">
-                                @if (selected is null)
-                                {
-                                    <button type="button" @onclick="() => AddMonster(monster)">Add</button>
-                                }
-                                else
-                                {
-                                    <span class="muted-text">Added x @(selected.Quantity)</span>
-                                    <button type="button" @onclick="() => AddMonster(monster)">+1</button>
-                                }
-                            </div>
-                        </div>
-                    }
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    
+        
+        
+        <div class="right-panel">
+            
+            <div class="summary-strip">
+                <div class="summary-box">
+                    <span>Total Monsters</span>
+                    <strong>@TotalMonsterCount</strong>
                 </div>
-            }
-        </div>
-    </div>
 
-    <div class="right-panel">
-        <div class="panel-card">
-            <h2>Party</h2>
+                <div class="summary-box">
+                    <span>Unique</span>
+                    <strong>@selectedMonsters.Count</strong>
+                </div>
 
-            <div class="form-row">
-                <label>Party Size</label>
-                <input type="number" min="1" value="@partySize" @oninput="OnPartySizeChanged" />
+                <div class="summary-box">
+                    <span>Raw XP</span>
+                    <strong>@TotalRawXp</strong>
+                </div>
+
+                <div class="summary-box">
+                    <span>Highest CR</span>
+                    <strong>@FormatCr(HighestCr)</strong>
+                </div>
+
+                <div class="summary-box @(calculationResult is not null ? "highlight-box" : "summary-box-muted")">
+                    <span>Adjusted XP</span>
+                    <strong>@(calculationResult?.AdjustedMonsterXp ?? 0)</strong>
+                </div>
+
+                <div class="summary-box @(calculationResult is not null ? "" : "summary-box-muted")">
+                    <span>Multiplier</span>
+                    <strong>@(calculationResult?.MonsterMultiplier ?? 0)</strong>
+                </div>
             </div>
 
-            <div class="form-row">
-                <label>Party Level</label>
-                <input type="number" min="1" max="20" value="@partyLevel" @oninput="OnPartyLevelChanged" />   
-            </div>
-        </div>
-
-        <div class="panel-card encounter-card">
+    <div class="panel-card encounter-board">
+        <div class="encounter-board-header">
             <h2>Encounter</h2>
 
-            <div class="section-button-row">
-                <button type="button" @onclick="ClearEncounter">Clear Encounter</button>
-            </div>
+            @if (calculationResult is not null)
+            {
+                <span class="difficulty-badge @(GetDifficultyClass(calculationResult.Difficulty))">
+                    @calculationResult.Difficulty
+                </span>
+            }
+        </div>
 
+        <div class="encounter-board-body">
             @if (selectedMonsters.Count == 0)
             {
-                <p class="muted-text" style="margin-top:10px;">No monsters added yet.</p>
+                <div class="encounter-empty-state">
+                    <p class="muted-text setup-empty-text">No monsters added yet.</p>
+                </div>
             }
             else
             {
@@ -135,8 +181,10 @@
                     @foreach (var selected in selectedMonsters)
                     {
                         <div class="encounter-item">
-                            <div>
-                                <strong>@selected.Name</strong>
+                            <div class="encounter-item-info">
+                                <strong class="monster-name-link" @onclick="() => OpenMonsterDetails(selected.MonsterId)">
+                                    @selected.Name
+                                </strong>
                                 <div class="muted-text">
                                     CR @FormatCr(selected.ChallengeRating), XP @selected.Xp each
                                 </div>
@@ -146,116 +194,207 @@
                             </div>
 
                             <div class="encounter-controls">
-                                <button type="button" @onclick="() => DecreaseQuantity(selected.MonsterId)">-</button>
+                                <button type="button" class="qty-btn" @onclick="() => DecreaseQuantity(selected.MonsterId)">-</button>
                                 <span class="qty-pill">@selected.Quantity</span>
-                                <button type="button" @onclick="() => IncreaseQuantity(selected.MonsterId)">+</button>
-                                <button type="button" @onclick="() => RemoveMonster(selected.MonsterId)">Remove</button>
+                                <button type="button" class="qty-btn" @onclick="() => IncreaseQuantity(selected.MonsterId)">+</button>
+                                <button type="button" class="remove-btn" @onclick="() => RemoveMonster(selected.MonsterId)">Remove</button>
                             </div>
                         </div>
                     }
                 </div>
             }
         </div>
+
+        <div class="encounter-board-footer">
+            <button type="button" @onclick="ClearEncounter">Clear Encounter</button>
+        </div>
+    </div>
+
+    <div class="panel-card result-card">
+        <div class="result-top">
+            <h2>Result</h2>
+            <button type="button" @onclick="CalculateEncounter" disabled="@(!CanCalculate || isCalculating)">
+                @(isCalculating ? "Calculating..." : "Calculate")
+            </button>
+        </div>
+
+        @if (calculationResult is null)
+        {
+            <p class="muted-text">No calculation yet.</p>
+        }
+        else
+        {
+            <div class="result-grid">
+                <div class="result-stat">
+                    <span class="result-stat-label">Easy Threshold</span>
+                    <span class="result-stat-value">@calculationResult.PartyEasyThreshold</span>
+                </div>
+
+                <div class="result-stat">
+                    <span class="result-stat-label">Medium Threshold</span>
+                    <span class="result-stat-value">@calculationResult.PartyMediumThreshold</span>
+                </div>
+
+                <div class="result-stat">
+                    <span class="result-stat-label">Hard Threshold</span>
+                    <span class="result-stat-value">@calculationResult.PartyHardThreshold</span>
+                </div>
+
+                <div class="result-stat">
+                    <span class="result-stat-label">Deadly Threshold</span>
+                    <span class="result-stat-value">@calculationResult.PartyDeadlyThreshold</span>
+                </div>
+            </div>
+        }
+
+        <div class="status-line">
+            Status: @statusMessage
+        </div>
+    </div>
+</div>
         
-        <div class="panel-card">
-            <h2>Summary</h2>
-
-            <div class="summary-grid">
-                <div class="summary-stat">
-                    <span class="summary-stat-label">Total monsters</span>
-                    <span class="summary-stat-value">@TotalMonsterCount</span>
-                </div>
-
-                <div class="summary-stat">
-                    <span class="summary-stat-label">Unique monsters</span>
-                    <span class="summary-stat-value">@selectedMonsters.Count</span>
-                </div>
-
-                <div class="summary-stat">
-                    <span class="summary-stat-label">Total raw XP</span>
-                    <span class="summary-stat-value">@TotalRawXp</span>
-                </div>
-
-                <div class="summary-stat">
-                    <span class="summary-stat-label">Highest CR</span>
-                    <span class="summary-stat-value">@FormatCr(HighestCr)</span>
-                </div>
+ 
+      
+    
+    @if (isMonsterDetailsOpen)
+{
+    <div class="monster-modal-backdrop" @onclick="CloseMonsterDetails">
+        <div class="monster-modal" @onclick:stopPropagation="true">
+            <div class="monster-modal-header">
+                <h2>Monster Details</h2>
+                <button type="button" @onclick="CloseMonsterDetails">Close</button>
             </div>
-        </div>
 
-       <div class="panel-card result-card">
-    <div class="result-top">
-        <h2 style="margin:0;">Result</h2>
-
-        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-            @if (calculationResult is not null)
+            @if (isLoadingMonsterDetails)
             {
-                <span class="difficulty-badge @(GetDifficultyClass(calculationResult.Difficulty))">
-                    @calculationResult.Difficulty
-                </span>
+                <p>Loading monster details...</p>
             }
+            else if (selectedMonsterDetails is null)
+            {
+                <p>No monster details found.</p>
+            }
+            else
+            {
+                <div class="monster-detail-top">
+                    @if (!string.IsNullOrWhiteSpace(selectedMonsterDetails.ImageUrl))
+                    {
+                        <div class="monster-image-frame">
+                            <div class="monster-image-placeholder @(isMonsterImageLoaded ? "hidden" : "")">
+                                <div class="monster-image-spinner"></div>
+                            </div>
 
-            <button type="button" @onclick="CalculateEncounter" disabled="@(!CanCalculate)">Calculate</button>
+                            <img src="@selectedMonsterDetails.ImageUrl"
+                                 alt="@selectedMonsterDetails.Name"
+                                 class="monster-detail-image @(isMonsterImageLoaded ? "loaded" : "")"
+                                 @onload="OnMonsterImageLoaded" />
+                        </div>
+                    }
+
+                    <div>
+                        <h3>@selectedMonsterDetails.Name</h3>
+                        <p class="muted-text">
+                            @selectedMonsterDetails.Size @selectedMonsterDetails.Type, @selectedMonsterDetails.Alignment
+                        </p>
+                        <p><strong>CR:</strong> @FormatCr(selectedMonsterDetails.ChallengeRating)</p>
+                        <p><strong>XP:</strong> @selectedMonsterDetails.Xp</p>
+                        <p><strong>AC:</strong> @selectedMonsterDetails.ArmorClass</p>
+                        <p><strong>HP:</strong> @selectedMonsterDetails.HitPoints (@selectedMonsterDetails.HitDice)</p>
+                        <p><strong>Speed:</strong> @selectedMonsterDetails.Speed</p>
+                        <p><strong>Languages:</strong> @selectedMonsterDetails.Languages</p>
+                    </div>
+                </div>
+
+                <div class="monster-statblock-abilities">
+                    <div class="monster-statblock-ability">
+                        <div class="monster-statblock-label">STR</div>
+                        <div class="monster-statblock-score">@selectedMonsterDetails.Strength (@FormatModifier(selectedMonsterDetails.Strength))</div>
+                    </div>
+                    <div class="monster-statblock-ability">
+                        <div class="monster-statblock-label">DEX</div>
+                        <div class="monster-statblock-score">@selectedMonsterDetails.Dexterity (@FormatModifier(selectedMonsterDetails.Dexterity))</div>
+                    </div>
+                    <div class="monster-statblock-ability">
+                        <div class="monster-statblock-label">CON</div>
+                        <div class="monster-statblock-score">@selectedMonsterDetails.Constitution (@FormatModifier(selectedMonsterDetails.Constitution))</div>
+                    </div>
+                    <div class="monster-statblock-ability">
+                        <div class="monster-statblock-label">INT</div>
+                        <div class="monster-statblock-score">@selectedMonsterDetails.Intelligence (@FormatModifier(selectedMonsterDetails.Intelligence))</div>
+                    </div>
+                    <div class="monster-statblock-ability">
+                        <div class="monster-statblock-label">WIS</div>
+                        <div class="monster-statblock-score">@selectedMonsterDetails.Wisdom (@FormatModifier(selectedMonsterDetails.Wisdom))</div>
+                    </div>
+                    <div class="monster-statblock-ability">
+                        <div class="monster-statblock-label">CHA</div>
+                        <div class="monster-statblock-score">@selectedMonsterDetails.Charisma (@FormatModifier(selectedMonsterDetails.Charisma))</div>
+                    </div>
+                </div>
+
+                @if (selectedMonsterDetails.DamageVulnerabilities.Any())
+                {
+                    <p><strong>Vulnerabilities:</strong> @string.Join(", ", selectedMonsterDetails.DamageVulnerabilities)</p>
+                }
+
+                @if (selectedMonsterDetails.DamageResistances.Any())
+                {
+                    <p><strong>Resistances:</strong> @string.Join(", ", selectedMonsterDetails.DamageResistances)</p>
+                }
+
+                @if (selectedMonsterDetails.DamageImmunities.Any())
+                {
+                    <p><strong>Immunities:</strong> @string.Join(", ", selectedMonsterDetails.DamageImmunities)</p>
+                }
+
+                @if (selectedMonsterDetails.SpecialAbilities.Any())
+                {
+                    <div class="monster-section">
+                        <h4>Special Abilities</h4>
+                        @foreach (var feature in selectedMonsterDetails.SpecialAbilities)
+                        {
+                            <p><strong>@feature.Name.</strong> @feature.Description</p>
+                        }
+                    </div>
+                }
+
+                @if (selectedMonsterDetails.Actions.Any())
+                {
+                    <div class="monster-section">
+                        <h4>Actions</h4>
+                        @foreach (var feature in selectedMonsterDetails.Actions)
+                        {
+                            <p><strong>@feature.Name.</strong> @feature.Description</p>
+                        }
+                    </div>
+                }
+
+                @if (selectedMonsterDetails.Reactions.Any())
+                {
+                    <div class="monster-section">
+                        <h4>Reactions</h4>
+                        @foreach (var feature in selectedMonsterDetails.Reactions)
+                        {
+                            <p><strong>@feature.Name.</strong> @feature.Description</p>
+                        }
+                    </div>
+                }
+
+                @if (selectedMonsterDetails.LegendaryActions.Any())
+                {
+                    <div class="monster-section">
+                        <h4>Legendary Actions</h4>
+                        @foreach (var feature in selectedMonsterDetails.LegendaryActions)
+                        {
+                            <p><strong>@feature.Name.</strong> @feature.Description</p>
+                        }
+                    </div>
+                }
+            }
         </div>
     </div>
-
-    @if (calculationResult is null)
-    {
-        <p class="muted-text">No calculation yet.</p>
-    }
-    else
-    {
-        <div class="result-grid">
-            <div class="result-stat">
-                <span class="result-stat-label">Easy Threshold</span>
-                <span class="result-stat-value">@calculationResult.PartyEasyThreshold</span>
-            </div>
-
-            <div class="result-stat">
-                <span class="result-stat-label">Medium Threshold</span>
-                <span class="result-stat-value">@calculationResult.PartyMediumThreshold</span>
-            </div>
-
-            <div class="result-stat">
-                <span class="result-stat-label">Hard Threshold</span>
-                <span class="result-stat-value">@calculationResult.PartyHardThreshold</span>
-            </div>
-
-            <div class="result-stat">
-                <span class="result-stat-label">Deadly Threshold</span>
-                <span class="result-stat-value">@calculationResult.PartyDeadlyThreshold</span>
-            </div>
-
-            <div class="result-stat">
-                <span class="result-stat-label">Raw Monster XP</span>
-                <span class="result-stat-value">@calculationResult.RawMonsterXp</span>
-            </div>
-
-            <div class="result-stat">
-                <span class="result-stat-label">Multiplier</span>
-                <span class="result-stat-value">@calculationResult.MonsterMultiplier</span>
-            </div>
-
-            <div class="result-stat">
-                <span class="result-stat-label">Adjusted XP</span>
-                <span class="result-stat-value">@calculationResult.AdjustedMonsterXp</span>
-            </div>
-
-            <div class="result-stat">
-                <span class="result-stat-label">Monster Count</span>
-                <span class="result-stat-value">@calculationResult.MonsterCount</span>
-            </div>
-        </div>
-    }
-
-    <div class="status-line">
-        Status: @statusMessage
+}
     </div>
 </div>
-    </div>
-</div>
-</div>
-
 
 @code {
     private List<MonsterListItemDto> monsters = new();
@@ -288,6 +427,10 @@
         DifficultyRating.Deadly => "difficulty-deadly",
         _ => "difficulty-default"
     };
+    private MonsterDetailsDto? selectedMonsterDetails;
+    private bool isMonsterDetailsOpen = false;
+    private bool isLoadingMonsterDetails = false;
+    private bool isMonsterImageLoaded = false;
     
 
     
@@ -438,7 +581,7 @@
         0.125m => "1/8",
         0.25m => "1/4",
         0.5m => "1/2",
-        _ => cr.ToString()
+        _ => cr % 1 == 0 ? decimal.Truncate(cr).ToString() : cr.ToString("0.##")
     };
     
     private void ResetFilters()
@@ -510,6 +653,45 @@
         };
 
         return query;
+    }
+    
+    private async Task OpenMonsterDetails(int monsterId)
+    {
+        try
+        {
+            isMonsterDetailsOpen = true;
+            isLoadingMonsterDetails = true;
+            isMonsterImageLoaded = false;
+            selectedMonsterDetails = null;
+
+            selectedMonsterDetails = await Api.GetMonsterDetailsAsync(monsterId);
+        }
+        catch (Exception ex)
+        {
+            statusMessage = $"Failed to load monster details: {ex.Message}";
+        }
+        finally
+        {
+            isLoadingMonsterDetails = false;
+        }
+    }
+
+    private void OnMonsterImageLoaded()
+    {
+        isMonsterImageLoaded = true;
+    }
+
+    private void CloseMonsterDetails()
+    {
+        isMonsterDetailsOpen = false;
+        selectedMonsterDetails = null;
+        isMonsterImageLoaded = false;
+    }
+    
+    private static string FormatModifier(int score)
+    {
+        var modifier = (score - 10) / 2;
+        return modifier >= 0 ? $"+{modifier}" : modifier.ToString();
     }
     
     

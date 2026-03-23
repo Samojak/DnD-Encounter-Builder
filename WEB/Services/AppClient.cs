@@ -25,4 +25,9 @@ public class ApiClient
 
         return await response.Content.ReadFromJsonAsync<EncounterCalculationResponseDto>();
     }
+    
+    public async Task<MonsterDetailsDto?> GetMonsterDetailsAsync(int id)
+    {
+        return await _http.GetFromJsonAsync<MonsterDetailsDto>($"api/monsters/{id}/details");
+    }
 }

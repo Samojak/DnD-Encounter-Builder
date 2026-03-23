@@ -1,8 +1,8 @@
 ﻿using API.Data;
+using API.Mappers;
 using Shared;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-
 
 namespace API.Controllers;
 
@@ -33,5 +33,18 @@ public class MonstersController : ControllerBase
             .ToListAsync();
 
         return Ok(monsters);
+    }
+
+    [HttpGet("{id:int}/details")]
+    public async Task<ActionResult<MonsterDetailsDto>> GetDetails(int id)
+    {
+        var monster = await _db.Monsters.FindAsync(id);
+
+        if (monster is null)
+            return NotFound();
+
+        var dto = MonsterMapper.ToDetailsDto(monster);
+
+        return Ok(dto);
     }
 }
