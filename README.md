@@ -2,11 +2,13 @@
 
 A full-stack web application for building and balancing Dungeons & Dragons 5e encounters using official XP and difficulty rules.
 
+![Encounter Builder Screenshot](/Pics/ScreenShot.png)
+
 ## Overview
 
 Encounter Builder helps Dungeon Masters quickly create encounters by selecting monsters and defining a party. The app calculates encounter difficulty based on party composition and monster XP multipliers according to D&D 5e guidelines.
 
-This project was built as a portfolio project to demonstrate full-stack development with .NET, API integration, and real-world problem solving.
+This project was built as a portfolio project to demonstrate full-stack development with .NET, API integration, and solving a real use case for D&D.
 
 ## Features
 
@@ -47,11 +49,11 @@ The project is structured into multiple layers:
 
 Data flow:
 
-1. Monsters are fetched from external API
-2. Stored locally in database
-3. Served via API endpoints
-4. Displayed and manipulated in UI
-5. Encounter calculation performed on backend
+1. Monsters are fetched from external API  
+2. Stored locally in database  
+3. Served via API endpoints  
+4. Displayed and manipulated in UI  
+5. Encounter calculation performed on backend  
 
 ## Encounter Calculation
 
@@ -62,12 +64,12 @@ The application follows official D&D 5e rules:
 * Monster XP is adjusted using multipliers based on number of monsters
 * Party size affects multiplier scaling
 
-Example output:
+Example output includes:
 
-* Raw XP
-* Adjusted XP
-* Monster count
-* Difficulty rating
+* Raw XP  
+* Adjusted XP  
+* Monster count  
+* Difficulty rating  
 
 ## Getting Started
 
@@ -79,9 +81,9 @@ Example output:
 
 ### Run the application
 
-1. Run the API project
-2. Run the Web project
-3. Open the browser at the Web app URL
+1. Run the API project  
+2. Run the Web project  
+3. Open the browser at the Web app URL  
 
 ### Import monsters
 
@@ -93,36 +95,36 @@ This will fetch and store all monsters locally.
 
 ## Project Structure
 
-```
+
 /API
-    Controllers
-    Services
-    Data
-    Clients
-    Mappers
+Controllers
+Services
+Data
+Clients
+Mappers
 
 /Shared
-    DTOs
-    Enums
+DTOs
+Enums
 
 /Web
-    Pages
-    Services
-    Components
-```
+Pages
+Services
+Components
+
 
 ## Future Improvements
 
-* Mixed-level party support
-* Encounter saving and loading
-* Advanced filtering (type, environment, size)
-* Pagination or virtualization for large lists
-* UI improvements and theming
-* Deployment to cloud
+* Mixed-level party support  
+* Encounter saving and loading  
+* Advanced filtering (type, environment, size)  
+* Pagination or virtualization for large lists  
+* UI improvements and theming  
+* Deployment to cloud  
 
 ## Motivation
 
-As a Dungeon Master, preparing balanced encounters can be time-consuming. This tool simplifies the process and provides immediate feedback, allowing more focus on storytelling and gameplay.
+As a Dungeon Master, preparing balanced encounters can take time and break the flow of session prep. This tool speeds that up and gives immediate feedback, so you can focus more on storytelling and less on calculations.
 
 ## Author
 
