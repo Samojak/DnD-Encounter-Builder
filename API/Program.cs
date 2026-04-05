@@ -16,6 +16,17 @@ builder.Services.AddHttpClient<DndApiClient>();
 builder.Services.AddScoped<MonsterImportService>();
 builder.Services.AddScoped<EncounterCalculationService>();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowReact", policy =>
+    {
+        policy
+            .WithOrigins("http://localhost:5173")
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
@@ -23,6 +34,8 @@ builder.Services.AddControllers()
     });
 
 var app = builder.Build();
+
+app.UseCors("AllowReact");
 
 using (var scope = app.Services.CreateScope())
 {
