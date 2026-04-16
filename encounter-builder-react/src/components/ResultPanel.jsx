@@ -1,53 +1,25 @@
-﻿export default function ResultPanel({
-                                        selectedMonsters,
-                                        handleCalculate,
-                                        isCalculating,
-                                        calculationResult,
-                                    }) {
-    return (
-        <div>
-            <div className="result-top">
-                <h2>Result</h2>
-                <button onClick={handleCalculate} disabled={selectedMonsters.length === 0}>
-                    {isCalculating ? "Calculating..." : "Calculate"}
-                </button>
-            </div>
+export default function ResultPanel({ calculationResult, canCalculate, isCalculating, runCalculation, statusMessage }) {
+  return (
+    <>
+      <div className="result-top">
+        <h2>Result</h2>
+        <button type="button" onClick={() => runCalculation()} disabled={!canCalculate || isCalculating}>
+          {isCalculating ? "Calculating..." : "Calculate"}
+        </button>
+      </div>
 
-            {!calculationResult ? (
-                <p className="muted-text">No calculation yet.</p>
-            ) : (
-                <div className="result-grid">
-                    <div className="result-stat">
-                        <span>Difficulty</span>
-                        <strong>{calculationResult.difficulty}</strong>
-                    </div>
-
-                    <div className="result-stat">
-                        <span>Easy</span>
-                        <strong>{calculationResult.partyEasyThreshold}</strong>
-                    </div>
-
-                    <div className="result-stat">
-                        <span>Medium</span>
-                        <strong>{calculationResult.partyMediumThreshold}</strong>
-                    </div>
-
-                    <div className="result-stat">
-                        <span>Hard</span>
-                        <strong>{calculationResult.partyHardThreshold}</strong>
-                    </div>
-
-                    <div className="result-stat">
-                        <span>Deadly</span>
-                        <strong>{calculationResult.partyDeadlyThreshold}</strong>
-                    </div>
-
-                    <div className="result-stat">
-                        <span>Adjusted XP</span>
-                        <strong>{calculationResult.adjustedMonsterXp}</strong>
-                    </div>
-                </div>
-            )}
+      {!calculationResult ? (
+        <p className="muted-text">No calculation yet.</p>
+      ) : (
+        <div className="result-grid">
+          <div className="result-stat"><span className="result-stat-label">Easy Threshold</span><span className="result-stat-value">{calculationResult.partyEasyThreshold}</span></div>
+          <div className="result-stat"><span className="result-stat-label">Medium Threshold</span><span className="result-stat-value">{calculationResult.partyMediumThreshold}</span></div>
+          <div className="result-stat"><span className="result-stat-label">Hard Threshold</span><span className="result-stat-value">{calculationResult.partyHardThreshold}</span></div>
+          <div className="result-stat"><span className="result-stat-label">Deadly Threshold</span><span className="result-stat-value">{calculationResult.partyDeadlyThreshold}</span></div>
         </div>
-    );
+      )}
+
+      <div className="status-line">Status: {statusMessage}</div>
+    </>
+  );
 }
