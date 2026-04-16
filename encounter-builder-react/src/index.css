@@ -44,7 +44,7 @@ select {
     gap: 14px;
     min-width: 0;
     min-height: 0;
-    height: 620px;
+    height: 480px;
 }
 
 .encounter-page .panel-card {
@@ -490,7 +490,7 @@ select {
 .encounter-page .monster-image-frame {
     position: relative;
     width: 100%;
-    min-height: 460px;
+    height: 300px;
     border-radius: 18px;
     overflow: hidden;
     border: 1px solid #b58b55;
@@ -776,8 +776,8 @@ select {
 .encounter-page .encounter-board {
     display: flex;
     flex-direction: column;
-    flex: 1;
-    min-height: 460px;
+    felx: 1;
+    height: 300px;
     overflow: hidden;
 }
 
